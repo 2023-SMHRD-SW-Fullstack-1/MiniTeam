@@ -5,6 +5,7 @@ public class Ex02 {
 
 		
 		System.out.println("첫번째");
+		
 	}
 
 }
