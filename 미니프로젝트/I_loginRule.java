@@ -3,6 +3,7 @@ package 미니프로젝트;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
 
 public interface I_loginRule {
 
@@ -25,6 +26,6 @@ public interface I_loginRule {
 	public abstract int join(String id,String pw);
 	
 	//전체 랭킹 조회 기능
-	public abstract int rank();
+	public abstract ArrayList<RankDTO> rank(int choice);
 
 }

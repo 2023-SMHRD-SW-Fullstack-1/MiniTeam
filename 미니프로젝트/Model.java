@@ -27,7 +27,6 @@ public class Model {
 
 			// DriverManager --> DB랑 연결 (실질적 연결)
 			conn = DriverManager.getConnection(url, id1, pw1);
-			System.out.println("연결 성공");
 		} catch (ClassNotFoundException | SQLException e) {
 			e.printStackTrace();
 		}
@@ -81,7 +80,7 @@ public class Model {
 		return false;
 	}
 
-	public int join(String id, String pw, String nick) {
+	public int join(String id, String pw) {
 		getConn();
 		int result = 0;
 		// (3)이름, 비밀번호, 닉네임 입력받아서 데이터를 추가
@@ -92,12 +91,14 @@ public class Model {
 			pstm = conn.prepareStatement(sql);
 			pstm.setString(1, id);
 			pstm.setString(2, pw);
-			pstm.setString(3, nick);
 
 			// 데이터 넣는 쿼리문을 실행하겠다
 			result = pstm.executeUpdate();
 			// executeQuery(); << 데이터를 가져올 때 씀
-
+			result = pstm.executeUpdate();
+			if (result > 0) {
+				System.out.println("회원가입 성공!");
+			}
 		} catch (SQLException e) {
 			System.out.println("쿼리문 오류");
 			e.printStackTrace();
@@ -107,7 +108,7 @@ public class Model {
 	}
 
 	public ArrayList<UserDTO> userList() {
-		getConn();
+
 		ArrayList<UserDTO> userList = new ArrayList<UserDTO>();
 		try {
 			// ********** 쿼리문 작성 코드 **************
@@ -116,7 +117,6 @@ public class Model {
 
 			// ********** 쿼리문 "실행!!!!" 해서 데이터 가져 오는 경우 **************
 			rs = pstm.executeQuery();// 쿼리를 실행 시키겠다는 내용
-
 			while (rs.next()) {
 				String id = rs.getString(1);
 				String pw = rs.getString(2);
@@ -133,23 +133,72 @@ public class Model {
 		return userList;
 	}
 
+	// 혜주
+	// 1.
 	// 전체 랭킹 출력 기능
-	public int rank(int choice) {
-		String sql = "select * from USER_INFO "; // 쿼리문 작성 하고
-		try {
-			pstm = conn.prepareStatement(sql);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+	public ArrayList<RankDTO> rank(int choice) {
+		ResultSet rs = null;
+		String rid = null;
+		int rscore = 0;
+		String result = null;
+
+		getConn();
+		ArrayList<RankDTO> rd = new ArrayList<RankDTO>();
 		if (choice == 1) {
+			try {
+				String sql = "select * from USER_INFO order by CSCORE desc";
+				pstm = conn.prepareStatement(sql);
+				rs = pstm.executeQuery();
+				while (rs.next()) {
+					rid = rs.getString(1);
+					rscore = rs.getInt(3);
+					rd.add(new RankDTO(rid,rscore));
+					
+					return rd;
+				}
 
+			} catch (SQLException e) {
+				System.out.println("쿼리문 오류");
+				e.printStackTrace();
+			}
 		} else if (choice == 2) {
+			try {
+				String sql = "select * from USER_INFO order by NSCORE desc";
+				pstm = conn.prepareStatement(sql);
+				rs = pstm.executeQuery();
+				while (rs.next()) {
+					rid = rs.getString(1);
+					rscore = rs.getInt(4);
+					rd.add(new RankDTO(rid,rscore));
+					
+					return rd;
+				}
 
+			} catch (SQLException e) {
+				System.out.println("쿼리문 오류");
+				e.printStackTrace();
+			}
 		} else {
+			try {
+				String sql = "select * from USER_INFO order by FSCORE desc";
+				pstm = conn.prepareStatement(sql);
+				rs = pstm.executeQuery();
+				while (rs.next()) {
+					rid = rs.getString(1);
+					rscore = rs.getInt(5);
+					rd.add(new RankDTO(rid,rscore));
+					
+					return rd;
+				}
 
+			} catch (SQLException e) {
+				System.out.println("쿼리문 오류");
+				e.printStackTrace();
+			}
 		}
+		close();
 
-		return 0;
+		return null;
 	}
 
 	// 최고 점수를 DB에 입력 하는 기능
