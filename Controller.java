@@ -20,8 +20,8 @@ public class Controller implements I_gameRule, I_loginRule{
 	
 	int index = 0;
 	public Controller() {
-		musicList.add(new MusicDTO("yes","music/yes.mp3"));
-		musicList.add(new MusicDTO("no", "music/no.mp3"));
+		musicList.add(new MusicDTO("C:\\Users\\smhrd\\Desktop\\JAVA\\miniP\\music\\yes.mp3"));
+		musicList.add(new MusicDTO("C:\\Users\\smhrd\\Desktop\\JAVA\\miniP\\music\\no.mp3"));
 	}
 	
 	public void play(int num) {
@@ -120,7 +120,7 @@ public class Controller implements I_gameRule, I_loginRule{
 		int result = 0;
 		// (3)이름, 비밀번호, 닉네임 입력받아서 데이터를 추가
 		try {
-			String sql = "insert into member values(?,?,?)";
+			String sql = "insert into user_info (id, pw) values(?,?)";
 
 			// insert into member values
 			pstm = conn.prepareStatement(sql);

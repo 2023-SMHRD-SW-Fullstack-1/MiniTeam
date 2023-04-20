@@ -136,6 +136,7 @@ public class View {
 					String ans = sc.next();
 					
 					if (c.checkAnswer(ans, choice, difficulty, randNum[i])) { // 정답 확인
+						c.play(1);
 						lib.SetConsoleTextAttribute(lib.GetStdHandle(STD_OUTPUT_HANDLE), GREEN);
 						System.out.println("  ______");
 						System.out.println(" /  __  \\");
@@ -162,6 +163,7 @@ public class View {
 						continue;
 					} else {	// 틀림
 						lib.SetConsoleTextAttribute(lib.GetStdHandle(STD_OUTPUT_HANDLE), RED);
+						c.play(2);
 						System.out.println("__   __");
 						System.out.println("\\ \\ / /");
 						System.out.println(" \\ V / ");
@@ -190,6 +192,7 @@ public class View {
 						ans = sc.next();
 						
 						if (c.checkAnswer(ans, choice, difficulty, randNum[i])) {
+							c.play(1);
 							lib.SetConsoleTextAttribute(lib.GetStdHandle(STD_OUTPUT_HANDLE), GREEN);
 							System.out.println("정답입니다.");
 							System.out.println("  ______");
@@ -215,6 +218,7 @@ public class View {
 							
 						} else {
 							System.out.println("틀렸습니다. 다음 문제로");
+							c.play(2);
 							lib.SetConsoleTextAttribute(lib.GetStdHandle(STD_OUTPUT_HANDLE), RED);
 							System.out.println("__   __");
 							System.out.println("\\ \\ / /");
