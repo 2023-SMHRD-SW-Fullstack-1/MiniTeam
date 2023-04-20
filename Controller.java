@@ -1,5 +1,3 @@
-package 미니프로젝트;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -7,16 +5,47 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Random;
+import javazoom.jl.player.MP3Player;
 
-public class Controller {
+public class Controller implements I_gameRule, I_loginRule{
 	int gScore=0;
 	int fail=0;
-
-	// db연결 변수
+	ArrayList<MusicDTO> musicList = new ArrayList<MusicDTO>();
+	MP3Player mp3 = new MP3Player();
+	
 	Connection conn = null;
 	PreparedStatement pstm = null;
 	ResultSet rs = null;
+	
+	
+	int index = 0;
+	public Controller() {
+		musicList.add(new MusicDTO("yes","music/yes.mp3"));
+		musicList.add(new MusicDTO("no", "music/no.mp3"));
+	}
+	
+	public void play(int num) {
 
+		// 현재 재생중인 음악이 있는지
+		if (mp3.isPlaying()) {
+			// 현재 재생중인 음악 정지
+			mp3.stop();
+		}
+
+		// index가 가리키고 있는 위치의 음악을 재생
+		mp3.play(musicList.get(num-1).getFilePath());
+		
+	}
+
+	// 정지
+		public void stop() {
+			if(mp3.isPlaying()) {
+				mp3.stop(); // 현재 음악 재생 정지
+			}
+			
+		}
+	
+	@Override
 	public void getConn() {
 
 		try {
@@ -35,6 +64,7 @@ public class Controller {
 		}
 	}
 
+	@Override
 	public void close() {
 		// 3. DB 연결 해체( = 연결의 역순으로)
 		try {
@@ -54,6 +84,7 @@ public class Controller {
 		}
 	}
 
+	@Override
 	public boolean login(String id, String pw) {
 		getConn();
 
@@ -83,6 +114,7 @@ public class Controller {
 		return false;
 	}
 
+	@Override
 	public int join(String id, String pw) {
 		getConn();
 		int result = 0;
@@ -98,10 +130,7 @@ public class Controller {
 			// 데이터 넣는 쿼리문을 실행하겠다
 			result = pstm.executeUpdate();
 			// executeQuery(); << 데이터를 가져올 때 씀
-			result = pstm.executeUpdate();
-			if (result > 0) {
-				System.out.println("회원가입 성공!");
-			}
+
 		} catch (SQLException e) {
 			System.out.println("쿼리문 오류");
 			e.printStackTrace();
@@ -110,6 +139,8 @@ public class Controller {
 		return result;
 	}
 
+	// 전체 랭킹 출력 기능
+	@Override
 	public ArrayList<RankDTO> rank(int choice) {
 
 		ResultSet rs = null;
@@ -121,7 +152,7 @@ public class Controller {
 		ArrayList<RankDTO> rd = new ArrayList<RankDTO>();
 		if (choice == 1) {
 			try {
-				String sql = "select * from USER_INFO order by CSCORE desc";
+				String sql = "select * from USER_INFO WHERE CSCORE IS NOT NULL order by CSCORE desc";
 				pstm = conn.prepareStatement(sql);
 				rs = pstm.executeQuery();
 				while (rs.next()) {
@@ -138,7 +169,7 @@ public class Controller {
 			}
 		} else if (choice == 2) {
 			try {
-				String sql = "select * from USER_INFO order by NSCORE desc";
+				String sql = "select * from USER_INFO WHERE NSCORE IS NOT NULL order by NSCORE desc";
 				pstm = conn.prepareStatement(sql);
 				rs = pstm.executeQuery();
 				while (rs.next()) {
@@ -155,7 +186,7 @@ public class Controller {
 			}
 		} else {
 			try {
-				String sql = "select * from USER_INFO order by FSCORE desc";
+				String sql = "select * from USER_INFO WHERE FSCORE IS NOT NULL order by FSCORE desc";
 				pstm = conn.prepareStatement(sql);
 				rs = pstm.executeQuery();
 				while (rs.next()) {
@@ -176,6 +207,7 @@ public class Controller {
 		return null;
 	}
 
+	@Override
 	public int[] random() {
 		Random rd = new Random();
 
@@ -229,7 +261,8 @@ public class Controller {
 		return be;
 	}
 
-	public String getQuiz(int type, int difficulty, int Qnum) {
+	@Override
+public String getQuiz(int type, int difficulty, int Qnum) {
 		
 		String selectquiz = "";
 		String sql="";
@@ -254,13 +287,20 @@ public class Controller {
 		
 	}
 
+	@Override
+	public boolean checkAnswer(String ans) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
 	public String hint(int type, int difficulty, int Qnum) {
-		
+
 		String hint = "";
 		String sql = "";
 		try {
 			sql = "SELECT HINT FROM QUESTION_INFO WHERE Q_TYPE = ? AND DIFFICULTY = ? AND QNUM = ?";
-			pstm=conn.prepareStatement(sql);
+			pstm = conn.prepareStatement(sql);
 			pstm.setString(1, conType(type));
 			pstm.setString(2, conDiffi(difficulty));
 			pstm.setInt(3, Qnum);
@@ -276,7 +316,7 @@ public class Controller {
 		return hint;
 
 	}
-
+	
 	public String conType(int type) {
 		String inputType = "";
 		if (type == 1) {
@@ -301,28 +341,9 @@ public class Controller {
 		return inputDifficulty;
 
 	}
+	
 
-	public boolean checkAnswer(String ans, int type, int difficulty, int Qnum) {
-		
-		try {
-			String correct = "SELECT ANSWER FROM QUESTION_INFO WHERE Q_TYPE = ? AND DIFFICULTY = ? AND QNUM = ?";
-			pstm = conn.prepareStatement(correct);
-			pstm.setString(1, conType(type));
-			pstm.setString(2, conDiffi(difficulty));
-			pstm.setInt(3, Qnum);
-			rs = pstm.executeQuery();
-			// ?에 들어갈 값이 문제에 나온 값이랑 똑같아야 함
-			if (rs.next()) {
-				if (ans.equals(rs.getString("Answer"))) {
-					return true;
-				}
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return false;
-	}
-
+	@Override
 	public int getScore(String id, int type, int score) {
 		getConn();
 		try {
@@ -367,6 +388,32 @@ public class Controller {
 		return score;
 	}
 
+	@Override
+	public int getTime() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	public boolean checkAnswer(String ans, int type, int difficulty, int Qnum) {
+
+		try {
+			String correct = "SELECT ANSWER FROM QUESTION_INFO WHERE Q_TYPE = ? AND DIFFICULTY = ? AND QNUM = ?";
+			pstm = conn.prepareStatement(correct);
+			pstm.setString(1, conType(type));
+			pstm.setString(2, conDiffi(difficulty));
+			pstm.setInt(3, Qnum);
+			rs = pstm.executeQuery();
+			// ?에 들어갈 값이 문제에 나온 값이랑 똑같아야 함
+			if (rs.next()) {
+				if (ans.equals(rs.getString("Answer"))) {
+					return true;
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
 	
 	public int addScore(int choice) {
 		if(choice == 1) {
@@ -398,5 +445,7 @@ public class Controller {
 	public int getGScore() {
 		return gScore;
 	}
-	
+
+
+
 }

@@ -1,16 +1,6 @@
-package 미니프로젝트;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.util.ArrayList;
 
 public interface I_loginRule {
-
-	
-	Connection conn = null;
-	PreparedStatement pstm = null;
-	ResultSet rs = null;
 	
 	//db 연결
 	public abstract void getConn();
@@ -26,6 +16,6 @@ public interface I_loginRule {
 	public abstract int join(String id,String pw);
 	
 	//전체 랭킹 조회 기능
-	public abstract ArrayList<RankDTO> rank(int choice);
+	ArrayList<RankDTO> rank(int choice);
 
 }
